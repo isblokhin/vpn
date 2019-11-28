@@ -1,0 +1,121 @@
+---
+  
+  - name: install and configure OVPN
+    hosts: all
+    gather_facts: yes
+    remote_user: vagrant
+    become: true
+   
+    tasks:
+    - name: install packages
+      yum: 
+        name: "{{ packages }}"
+        state: present
+
+    - name: enable ntpd
+      systemd:
+        name: ntpd
+        enabled: true
+      notify: restart ntpd
+
+    - name: set timezone
+      timezone:
+        name: Europe/Moscow
+
+    - name: Change the openvpn_t server to permissive
+      selinux_permissive:
+        name: openvpn_t
+        permissive: true
+    vars:
+      packages:
+      - ntp
+      - tzdata
+      - epel-release
+      - openvpn
+      - mc
+      - policycoreutils-python
+
+    handlers:
+      - name: restart ntpd
+        systemd:
+          name: ntpd
+          state: restarted
+      - name: start openvpn
+        systemd:
+          name: openvpn-server@server
+          state: started
+      - name: enable openvpn
+        systemd:
+          name: openvpn-server@server
+          enabled: yes
+
+
+
+    
+  - hosts: vpns
+    become: yes
+    tasks:
+    - name: copy static.key
+      copy:
+        src: static.key
+        dest: /etc/openvpn/static.key
+        owner: root
+        group: root
+        mode: '0644'
+    - name: copy server.conf
+      copy:
+        src: server.conf
+        dest: /etc/openvpn/server/server.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+      - start openvpn
+      - enable openvpn
+
+    handlers:
+      - name: start openvpn
+        systemd:
+          name: openvpn-server@server
+          state: started
+      - name: enable openvpn
+        systemd:
+          name: openvpn-server@server
+          enabled: yes
+
+
+  - hosts: vpnc
+    become: yes
+    tasks:
+    - name: copy client.conf
+      copy:
+        src: server1.conf
+        dest: /etc/openvpn/server/server.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+      - start openvpn
+      - enable openvpn   
+
+#    vars:
+#      packages:
+#      - ntp
+#      - tzdata
+#      - epel-release
+#      - openvpn
+#      - mc 
+#      - policycoreutils-python
+
+
+    handlers:
+      - name: start openvpn
+        systemd:
+          name: openvpn-server@server
+          state: started
+      - name: enable openvpn  
+        systemd:
+          name: openvpn-server@server 
+          enabled: yes
+
+...

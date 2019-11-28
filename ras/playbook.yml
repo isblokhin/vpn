@@ -1,0 +1,98 @@
+---
+  
+  - name: install and configure OVPN
+    hosts: all
+    gather_facts: yes
+    remote_user: vagrant
+    become: true
+   
+    tasks:
+    - name: install packages
+      yum: 
+        name: "{{ packages }}"
+        state: present
+
+    - name: enable ntpd
+      systemd:
+        name: ntpd
+        enabled: true
+      notify: restart ntpd
+
+    - name: set timezone
+      timezone:
+        name: Europe/Moscow
+
+    - name: Change the openvpn_t server to permissive
+      selinux_permissive:
+        name: openvpn_t
+        permissive: true
+   
+
+    vars:
+      packages:
+      - ntp
+      - tzdata
+      - epel-release
+      - openvpn
+      - mc
+      - easy-rsa
+      - policycoreutils-python
+
+
+ 
+  - hosts: vpns
+    become: yes
+    tasks:
+    - name: copy server cert and conf
+      copy:
+        src: "{{ item }}"
+        dest: /etc/openvpn/
+        owner: root
+        group: root
+        mode: '0644'
+      with_fileglob:
+      - ca.crt
+      - server.*
+      - dh.pem
+      notify:
+      - start openvpn
+      - enable openvpn
+
+  - hosts: vpnc
+    become: yes
+    tasks:
+    - name: copy client cert and conf
+      copy:
+        src: "{{ item }}"
+        dest: /etc/openvpn/
+        owner: root
+        group: root
+        mode: '0644'
+      with_fileglob:
+      - ca.crt
+      - client.*
+      - dh.pem
+      notify:
+      - start openvpn
+      - enable openvpn
+
+      notify:
+      - start openvpn
+      - enable openvpn   
+
+
+    handlers:
+      - name: restart ntpd
+        systemd:
+          name: ntpd
+          state: restarted
+      - name: start openvpn
+        systemd:
+          name: openvpn-server@server
+          state: started
+      - name: enable openvpn  
+        systemd:
+          name: openvpn-server@server 
+          enabled: yes
+
+...
