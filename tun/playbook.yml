@@ -62,6 +62,7 @@
         owner: root
         group: root
         mode: '0644'
+
     - name: copy server.conf
       copy:
         src: server.conf
@@ -94,6 +95,8 @@
         owner: root
         group: root
         mode: '0644'
+
+    - name: copy server1.conf
       copy:
         src: server1.conf
         dest: /etc/openvpn/server/server.conf

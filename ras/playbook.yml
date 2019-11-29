@@ -29,24 +29,8 @@
         name: openvpn_t
         permissive: true
 
-# т.к. handlers работает только в описании под каждым хостом -
-# я вынес handlers в отдельный файл 
-# по аналогии и с vars
-
-    - include: handlers/main.yml
-
-
-#    vars:
-#      packages:
-#      - ntp
-#      - tzdata
-#      - epel-release
-#      - openvpn
-#      - mc
-#      - easy-rsa
-#      - policycoreutils-python
-
-
+    handlers:
+    - include: hand.yml
  
   - hosts: vpnsrv
     become: yes
@@ -62,11 +46,24 @@
       - ca.crt
       - server.*
       - dh.pem
+
+    - name: copy server.conf
+      copy:
+        src: "{{ item }}"
+        dest: /etc/openvpn/server/
+        owner: root
+        group: root
+        mode: '0644'
+      with_fileglob:
+      - server.conf
+
       notify:
       - start openvpn
       - enable openvpn
 
-    - include: handlers/main.yml
+    handlers:
+    - include: hand.yml
+
 
   - hosts: vpncl
     become: yes
@@ -82,24 +79,21 @@
       - ca.crt
       - client.*
       - dh.pem
+    - name: copy client.conf
+      copy:
+        src: "{{ item }}"
+        dest: /etc/openvpn/client/
+        owner: root
+        group: root
+        mode: '0644'
+      with_fileglob:
+      - client.conf
+
       notify:
-      - start openvpn
-      - enable openvpn
+      - start openvpn client
+      - enable openvpn 
 
-    - include: рфтвдукы.ьфштюньд
-
-#    handlers:
-#      - name: restart ntpd
-#        systemd:
-#          name: ntpd
-#          state: restarted
-#      - name: start openvpn
-#        systemd:
-#          name: openvpn-server@server
-#          state: started
-#      - name: enable openvpn  
-#        systemd:
-#          name: openvpn-server@server 
-#          enabled: yes
+    handlers:
+    - include: hand.yml
 
 ...

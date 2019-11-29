@@ -11,4 +11,9 @@
     systemd:
       name: openvpn-server@server
       enabled: yes
+  - name: start openvpn client
+    systemd:
+      name: openvpn-client@client
+      state: started
+
 ...
