@@ -89,6 +89,12 @@
     tasks:
     - name: copy client.conf
       copy:
+        src: static.key
+        dest: /etc/openvpn/static.key
+        owner: root
+        group: root
+        mode: '0644'
+      copy:
         src: server1.conf
         dest: /etc/openvpn/server/server.conf
         owner: root
