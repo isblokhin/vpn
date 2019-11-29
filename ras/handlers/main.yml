@@ -1,0 +1,14 @@
+--- 
+  - name: restart ntpd
+    systemd:
+      name: ntpd
+      state: restarted
+  - name: start openvpn
+    systemd:
+      name: openvpn-server@server
+      state: started
+  - name: enable openvpn
+    systemd:
+      name: openvpn-server@server
+      enabled: yes
+...

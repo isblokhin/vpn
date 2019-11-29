@@ -7,6 +7,8 @@
     become: true
    
     tasks:
+    - name: include default step variables
+      include_vars: vars.yml
     - name: install packages
       yum: 
         name: "{{ packages }}"
@@ -26,21 +28,23 @@
       selinux_permissive:
         name: openvpn_t
         permissive: true
-   
 
-    vars:
-      packages:
-      - ntp
-      - tzdata
-      - epel-release
-      - openvpn
-      - mc
-      - easy-rsa
-      - policycoreutils-python
+    - include: handlers/main.yml
+
+
+#    vars:
+#      packages:
+#      - ntp
+#      - tzdata
+#      - epel-release
+#      - openvpn
+#      - mc
+#      - easy-rsa
+#      - policycoreutils-python
 
 
  
-  - hosts: vpns
+  - hosts: vpnsrv
     become: yes
     tasks:
     - name: copy server cert and conf
@@ -58,7 +62,9 @@
       - start openvpn
       - enable openvpn
 
-  - hosts: vpnc
+    - include: handlers/main.yml
+
+  - hosts: vpncl
     become: yes
     tasks:
     - name: copy client cert and conf
@@ -76,23 +82,20 @@
       - start openvpn
       - enable openvpn
 
-      notify:
-      - start openvpn
-      - enable openvpn   
+    - include: рфтвдукы.ьфштюньд
 
-
-    handlers:
-      - name: restart ntpd
-        systemd:
-          name: ntpd
-          state: restarted
-      - name: start openvpn
-        systemd:
-          name: openvpn-server@server
-          state: started
-      - name: enable openvpn  
-        systemd:
-          name: openvpn-server@server 
-          enabled: yes
+#    handlers:
+#      - name: restart ntpd
+#        systemd:
+#          name: ntpd
+#          state: restarted
+#      - name: start openvpn
+#        systemd:
+#          name: openvpn-server@server
+#          state: started
+#      - name: enable openvpn  
+#        systemd:
+#          name: openvpn-server@server 
+#          enabled: yes
 
 ...

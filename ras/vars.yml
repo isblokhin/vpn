@@ -1,0 +1,10 @@
+---
+  packages:
+  - ntp
+  - tzdata
+  - epel-release
+  - openvpn
+  - mc
+  - easy-rsa
+  - policycoreutils-python
+
