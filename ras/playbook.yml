@@ -29,6 +29,10 @@
         name: openvpn_t
         permissive: true
 
+# т.к. handlers работает только в описании под каждым хостом -
+# я вынес handlers в отдельный файл 
+# по аналогии и с vars
+
     - include: handlers/main.yml
 
 
